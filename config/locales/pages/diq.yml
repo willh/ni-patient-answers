@@ -1,0 +1,37 @@
+# Messages for Zazaki (Zazaki)
+# Exported from translatewiki.net
+# Export driver: syck-pecl
+# Author: Erdemaslancan
+# Author: Mirzali
+diq: 
+  activerecord: 
+    attributes: 
+      page: 
+        css: Pelê terzan
+        js: JavaScript
+    models: 
+      page: Pele
+      pages: Peli
+  pages: 
+    actions: 
+      create_page: Pela newiye vıraze
+      edit_page: Pele bıvurne
+      title: Kerdışi
+    create: 
+      success: Pele be mıwefeqiyet vıraziye.
+    edit: 
+      title: Pela vurnayışi
+    form: 
+      language_tip: Pela zıwani
+      title_tip: "Sernuşteyê pele. Ney referansê pele bıgurenê. Mesela:\n[[FAQ|persê ke zaf persiyenê]]"
+    index: 
+      create_page: Pela newiye vıraze
+      title: Lista pelan
+      wiki: Wiki
+      wiki_pages: Pelê Wikiy
+      written_in: "%{language} de nusiyayo"
+    new: 
+      title: Pela newiye
+    title: Mı raşt ke
+    update: 
+      success: Pele be mıwefeqiyet biye rocaniye.

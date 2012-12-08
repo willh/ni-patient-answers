@@ -1,0 +1,2208 @@
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70188492157400 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70188493503180 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70188493532900 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c344bc154555745b000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c344bc154555745b000016"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c344bc154555745b000016", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c344bc154555745b000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c344bc154555745b000013"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c344be154555745b000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c344be154555745b000018"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c344be154555745b000018", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c344be154555745b000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70097371105180 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70097368548560 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70097369645200 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.chunks"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.files"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c345981545557474000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c345981545557474000016"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c345981545557474000016", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c345981545557474000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c345981545557474000013"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c345991545557474000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c345991545557474000018"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c345991545557474000018", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c345991545557474000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70244187935760 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70244188934320 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70244188938980 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:54 +0000
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 3077ms
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"bug_hunter_errors"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost:3000\/\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost:3000\/\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"bug_hunter_projects"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_projects'].find({}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_projects'].find({}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:58 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 13:51:59 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 1ms
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70140181764460 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70140181309220 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70140182619020 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.chunks"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.files"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"bug_hunter_errors"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"bug_hunter_projects"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348261545557539000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c348261545557539000016"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c348261545557539000016", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348261545557539000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c348261545557539000013"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348271545557539000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c348271545557539000018"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c348271545557539000018", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348271545557539000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70317543892500 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70317543988080 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70317555475480 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.chunks"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.files"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348a61545557549000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c348a61545557549000016"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c348a61545557549000016", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348a61545557549000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c348a61545557549000013"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348a71545557549000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c348a71545557549000018"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c348a71545557549000018", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c348a71545557549000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70139067651740 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70139066409460 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70139085297360 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.chunks"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.files"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34927154555755b000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c34927154555755b000016"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c34927154555755b000016", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34927154555755b000016", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c34927154555755b000013"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34928154555755b000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c34928154555755b000018"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c34928154555755b000018", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34928154555755b000018", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70119283373860 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70119283370520 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70119283367220 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70314116958880 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70314116714860 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70314114121900 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_public"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_public"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_private"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_private"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"special"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"special"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"free"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"basic"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"basic"}, "fields"=>nil}).limit(-1)
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70130838922860 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70130827351260 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70130836243400 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.chunks"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"fs.files"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_public"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_public"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_private"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_private"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"special"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"special"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"free"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"basic"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"basic"}, "fields"=>nil}).limit(-1)
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70284814158940 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70284815418860 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70284841043900 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:drop=>"shapado_versions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_public"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_public"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"legacy_private"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"legacy_private"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"special"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"special"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"free"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"basic"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"basic"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"plus"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"plus"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"premium"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"premium"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"maximium"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"maximium"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"optimum"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"optimum"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"private"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{:token=>"private"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"users"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:login=>"admin"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"users", "query"=>{:email=>"shapado@example.com"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"friend_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"external_friends_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"read_lists"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:email=>"shapado@example.com", :anonymous=>true}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"themes"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"themes", "query"=>{:name=>"Default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34e471545557640000020", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c34e471545557640000020"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c34e471545557640000020", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34e471545557640000020", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c34e47154555764000001d"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34e481545557640000022", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c34e481545557640000022"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c34e481545557640000022", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"themes/50c34e481545557640000022", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"groups"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:login=>"admin"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:name=>"Shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:subdomain=>"shapado"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"groups", "query"=>{:domain=>"localhost.lan"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:is_default=>true}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:token=>"free"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"tags"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"technology", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"business", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"science", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"politics", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"religion", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"sports", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"entertainment", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"gaming", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"lifestyle", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"tags", "query"=>{:name=>"offbeat", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"memberships"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['memberships'].find({:user_id=>"50c34e471545557640000014", :group_id=>"50c34e481545557640000024"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:_id=>"50c34e471545557640000014"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:_id=>"50c34e481545557640000024"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"memberships", "query"=>{:user_id=>"50c34e471545557640000014", :group_id=>"50c34e481545557640000024"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"memberships", "query"=>{:state=>"active", "user_id"=>"50c34e471545557640000014"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['memberships'].find({:state=>"active", "user_id"=>"50c34e471545557640000014"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:_id=>"50c34e481545557640000024"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"groups/50c34e4c1545557640000043", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"groups/50c34e4c1545557640000043"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"groups/50c34e4c1545557640000043", "n"=>0})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"filemd5"=>"groups/50c34e4c1545557640000043", "root"=>"fs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"constrains_configs"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"constrains_configs", "query"=>{}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['constrains_configs'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"constrains_configs", "query"=>{:name=>"default"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"constrains_configs", "query"=>{:name=>"bootstrap"}, "fields"=>nil}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:_id=>"50c34e471545557640000014"}).limit(-1).sort([[:_id, :asc]])
+MongoDB logging. Please note that logging negatively impacts performance and should be disabled for high-performance production apps.
+MONGODB admin['$cmd'].find({:ismaster=>1}).limit(-1)
+* Loaded locales: ["be-Tarask", "brca", "da", "de", "el", "en", "eo", "es", "es-419", "fa", "fi", "fr", "gl", "hu", "ia", "id", "it", "ja", "ko", "mk", "ms", "nl", "pl", "pt-BR", "pt-PT", "ru", "sr", "sr-Latn", "sv", "te", "tl", "zh-CN"]
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70159850814780 @data="db.system.js.save({_id: 'filter', value: function filter(collection, q, config) {
+  var results = [];
+  var counter = 0;
+
+  var fields = {_keywords: 1};
+  for(var i in config.select) {
+    fields[config.select[i]] = 1;
+  }
+
+  var time = new Date().getTime();
+  db[collection].find(q, fields).limit(500).forEach(function(doc) {
+    var rac = db.eval(
+      function(doc, config) {
+        var r = [];
+        var c = 0;
+
+        var set = {};
+        for(var i = 0; i<doc._keywords.length; i++) {
+          set[doc._keywords[i]] = true;
+        }
+
+        var score = 0.0;
+        for(var i = 0; i < config.words.length; i++) {
+          var word = config.words[i];
+          if(set[word]) {
+            score += 15.0;
+          }
+        }
+
+        for(var i = 0; i < config.stemmed.length; i++) {
+          var word = config.stemmed[i];
+          if(set[word]) {
+            score += (1.0 + word.length);
+          }
+        }
+
+        if(score >= config.min_score || 1.0 ) {
+          delete doc._keywords;
+          r.push({'score': score, 'doc': doc});
+          c += 1;
+        }
+
+        return [r, c];
+      },
+      doc,
+      config
+    );
+
+    for(var i = 0; i<rac[0].length; i++) {
+      results.push(rac[0][i]);
+    }
+    counter += rac[1];
+  });
+
+  var sorted = results.sort(function(a,b) {
+    return b.score - a.score;
+  });
+
+  time = (new Date().getTime() - time);
+
+  return {total_entries: counter, elapsed_time:  time, results: sorted.slice(0, config.limit||500)};
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70159850808440 @data="db.system.js.save({_id: 'find_tags', value: function find_tags(collection, regex, query, limit) {
+  var counts = db.eval(
+    function(collection, regex, query){
+      var counts = {};
+      db[collection].find(query, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              if(name.match(regex) != null)
+                counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      return counts;
+    },
+    collection,
+    regex,
+    query
+  );
+
+  var tags = [];
+  for ( var tag in counts ){
+    tags.push( { name : tag , count : counts[tag] } )
+  }
+
+  return tags;
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:$eval=><BSON::Code:70159891113000 @data="db.system.js.save({_id: 'tag_cloud', value: // TODO: port it to map reduce
+function tagCloud(collection, q, limit) {
+  var counts = db.eval(
+    function(collection, q){
+      var counts = {constructor: 0};
+      db[collection].find(q, {"tags":1}).limit(500).forEach(
+        function(p){
+          if ( p.tags ){
+            for ( var i=0; i<p.tags.length; i++ ){
+              var name = p.tags[i];
+              counts[name] = 1 + ( counts[name] || 0 );
+            }
+          }
+        }
+      );
+      if(counts["constructor"] == 0) { delete counts.constructor; }
+      return counts;
+    },
+    collection,
+    q
+  );
+
+  // maybe sort to by nice
+  var sorted = [];
+  for ( var tag in counts ){
+    sorted.push( { name : tag , count : counts[tag] } )
+  }
+
+  return sorted.slice(0,limit||30);
+}
+})" @scope="{}">, :args=>[]}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({"count"=>"shapado_versions", "query"=>{}, "fields"=>nil}).limit(-1)
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 14:28:02 +0000
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost"}).limit(-1).sort([[:_id, :asc]])
+Redirected to http://localhost.lan:3000
+Filter chain halted as :find_group rendered or redirected
+Completed 302 Found in 2934ms
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"bug_hunter_errors"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost:3000\/\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost:3000\/\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"bug_hunter_projects"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_projects'].find({}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_projects'].find({}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/" for 127.0.0.1 at 2012-12-08 14:28:05 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:_id=>BSON::ObjectId('50c34e38154555764000000d')}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c34e47154555764000001d"}).limit(-1).sort([[:_id, :asc]])
+  Rendered questions/_nav_filters.html.haml (10.4ms)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"questions"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['questions'].find({:banned=>false, :group_id=>"50c34e481545557640000024", :language=>"en"}, {:_id=>1}).limit(-1)
+  Rendered shared/_empty.html.haml (98.8ms)
+  Rendered shared/_posts.html.haml (108.4ms)
+  Rendered questions/index.html.haml within layouts/shapadocom (126.3ms)
+Completed 200 OK in 273ms (Views: 257.8ms)
+
+
+Started GET "/assets/shapadocom.css" for 127.0.0.1 at 2012-12-08 14:28:06 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/shapadocom.js" for 127.0.0.1 at 2012-12-08 14:28:06 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/questions" for 127.0.0.1 at 2012-12-08 14:28:35 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+Processing by QuestionsController#index as HTML
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['shapado_versions'].find({:_id=>BSON::ObjectId('50c34e38154555764000000d')}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c34e47154555764000001d"}).limit(-1).sort([[:_id, :asc]])
+  Rendered questions/_nav_filters.html.haml (4.3ms)
+[0;34m(F)[0m MONGODB shapado-development['questions'].find({:banned=>false, :group_id=>"50c34e481545557640000024", :language=>"en"}, {:_id=>1}).limit(-1)
+  Rendered shared/_empty.html.haml (0.9ms)
+  Rendered shared/_posts.html.haml (3.8ms)
+  Rendered questions/index.html.haml within layouts/application (9.7ms)
+  Rendered shared/layout/_css.html.haml (1.7ms)
+  Rendered shared/layout/_feeds.html.haml (1.0ms)
+  Rendered shared/layout/_meta.html.haml (3.7ms)
+  Rendered shared/_analytics.haml (1.2ms)
+  Rendered shared/layout/_head.html.haml (11.4ms)
+  Rendered shared/_login_drop_down.html.haml (12.4ms)
+  Rendered shared/_login_menu.html.haml (15.1ms)
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:state=>"active", :private=>false}, {:_type=>1, :name=>1, :domain=>1}).limit(10).sort([[:activity_rate, :desc]])
+  Rendered groups/_top_grouplist.html.haml (4.5ms)
+  Rendered shared/_topbar.html.haml (101.7ms)
+header
+  Rendered shared/_default_adsense.haml (1.5ms)
+  Rendered shared/_widgets.html.haml (4.4ms)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['$cmd'].find({:create=>"announcements"}).limit(-1)
+[0;34m(F)[0m MONGODB shapado-development['announcements'].find({:starts_at=>{"$lte"=>1354976915}, :ends_at=>{"$gte"=>1354976915}, :group_id=>{"$in"=>["50c34e481545557640000024", nil]}}, {:_id=>1}).limit(-1)
+  Rendered shared/_content-nav.html.haml (3.8ms)
+  Rendered shared/_quick_question_box.html.haml (6.7ms)
+  Rendered shared/layout/_header.html.haml (24.8ms)
+sidebar
+  Rendered shared/_default_adsense.haml (0.2ms)
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['memberships'].find({:state=>"active", "group_id"=>"50c34e481545557640000024"}).limit(5).sort([["created_at", "desc"]])
+[0;34m(F)[0m MONGODB shapado-development['system.namespaces'].find({})
+[0;34m(F)[0m MONGODB shapado-development['users'].find({:_id=>"50c34e471545557640000014"}).limit(-1).sort([[:_id, :asc]])
+  Rendered widgets/_header.html.haml (1.1ms)
+  Rendered widgets/_users.html.haml (13.8ms)
+  Rendered shared/_widgets.html.haml (16.1ms)
+  Rendered shared/layout/_column3.html.haml (18.0ms)
+  Rendered shared/layout/_column2.html.haml (1.7ms)
+footer
+  Rendered shared/_default_adsense.haml (0.1ms)
+  Rendered shared/_widgets.html.haml (0.9ms)
+  Rendered shared/_login_drop_down.html.haml (5.6ms)
+  Rendered welcome/_feedback.haml (5.0ms)
+  Rendered shared/layout/_javascript.html.haml (3.5ms)
+  Rendered shared/layout/_websocket.html.haml (1.5ms)
+  Rendered shared/layout/_footer.html.haml (25.5ms)
+Completed 200 OK in 214ms (Views: 206.6ms)
+
+
+Started GET "/_files/themes/css/50c34e481545557640000024/50c34e47154555764000001d/1.css" for 127.0.0.1 at 2012-12-08 14:28:35 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:_id=>"50c34e481545557640000024"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['themes'].find({:_id=>"50c34e47154555764000001d"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"themes/50c34e481545557640000022"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"themes/50c34e481545557640000022", "n"=>0})
+
+
+Started GET "/assets/application.css" for 127.0.0.1 at 2012-12-08 14:28:35 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+WARNING on line 30 of /projects/kainos/shapado/app/assets/stylesheets/helper/items/menubar.css.sass:
+This selector doesn't have any properties and will not be rendered.
+WARNING on line 153 of /projects/kainos/shapado/app/assets/stylesheets/helper/items/widgets.css.sass:
+This selector doesn't have any properties and will not be rendered.
+WARNING on line 56 of /projects/kainos/shapado/app/assets/stylesheets/helper/items/editors.css.sass:
+This selector doesn't have any properties and will not be rendered.
+WARNING on line 122 of /projects/kainos/shapado/app/assets/stylesheets/helper/items/editors.css.sass:
+This selector doesn't have any properties and will not be rendered.
+WARNING on line 114 of /projects/kainos/shapado/app/assets/stylesheets/structure/general.css.sass:
+This selector doesn't have any properties and will not be rendered.
+WARNING on line 207 of /projects/kainos/shapado/app/assets/stylesheets/components/users.css.sass:
+This selector doesn't have any properties and will not be rendered.
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost\.lan:3000\/assets\/application\.css\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_errors'].find({:resolved=>false, :message=>/^Slow\ request\ GET\ http:\/\/localhost\.lan:3000\/assets\/application\.css\ `.+'/, :file=>nil, :line=>nil}, {:_type=>1, :_id=>1}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['bug_hunter_projects'].find({}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/i18n/en.js" for 127.0.0.1 at 2012-12-08 14:28:37 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/application.js" for 127.0.0.1 at 2012-12-08 14:28:37 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/modernizr.js" for 127.0.0.1 at 2012-12-08 14:28:38 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/_files/groups/logo/50c34e481545557640000024/0.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:_id=>"50c34e481545557640000024"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['fs.files'].find({"_id"=>"groups/50c34e4c1545557640000043"})
+[0;34m(F)[0m MONGODB shapado-development['fs.chunks'].find({"files_id"=>"groups/50c34e4c1545557640000043", "n"=>0})
+
+
+Started GET "/assets/search-icon.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/empty.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/ribbon-medium.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/q-icon-medium.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/user-medium.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/tags-medium.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])
+
+
+Started GET "/assets/activity-iacon.png" for 127.0.0.1 at 2012-12-08 14:28:39 +0000
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}).limit(-1).sort([[:_id, :asc]])
+[0;34m(F)[0m MONGODB shapado-development['groups'].find({:domain=>"localhost.lan"}, {:_type=>1, :share=>1}).limit(-1).sort([[:_id, :asc]])

@@ -1,0 +1,50 @@
+# Messages for Zazaki (Zazaki)
+# Exported from translatewiki.net
+# Export driver: syck-pecl
+# Author: Erdemaslancan
+# Author: Mirzali
+diq: 
+  layouts: 
+    application: 
+      all: Pêro
+      badges: Rozeti
+      collaborate: Piyakarkerdış
+      faq: PZP (Persê ke zehf persiyenê)
+      feed: Pawêno
+      followed: Pawêno
+      home: Keye
+      languages: Zıwani
+      log_in: Cıkewtış
+      logout: Bıvciyê
+      pages: Peli
+      preferred: Tercihbiyaye
+      search: Cı geyre
+      settings: Sazi
+      signup: Hesabo Newe Ake
+      tags: Etiketi
+      users: Karberi
+    manage: 
+      access: Cırestış
+      actions: Kerdışi
+      announcements: Elani
+      appearance: Asayış
+      close_group: Gruber racne
+      constrains: Ekê lazımi
+      content: Tede este
+      dashboard: Panela mocnayışi
+      domain: Domain
+      general: Heran
+      group_features: Weçinaye
+      group_look_and_feel: Bewni & bawerne
+      invitations: Dawetname
+      invoices: Faturey
+      members: Ezay
+      pages: Peli
+      properties: Xısusiyey
+      reputation: Nam
+      rewards: Xelati
+      social: Sosyal
+      stats: İstat
+      theme: Tema
+      themes: Temay
+      widgets: Widgeti

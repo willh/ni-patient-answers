@@ -1,0 +1,19 @@
+# Messages for Zazaki (Zazaki)
+# Exported from translatewiki.net
+# Export driver: syck-pecl
+# Author: Erdemaslancan
+# Author: Mirzali
+diq: 
+  activerecord: 
+    attributes: 
+      announcement: 
+        ends_at: Qedyayen
+        message: Mesac
+        only_anonymous: Tenya qandê anonim karberan
+        starts_at: Dest pêkerden
+  announcements: 
+    actions: 
+      delete: Wedarne
+      title: Kerdışi
+    index: 
+      title: Elani
