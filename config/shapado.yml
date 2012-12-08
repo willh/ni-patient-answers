@@ -22,16 +22,16 @@ base: &common
     client: pub-1545349678095918
     header:
       slot: 3950567538
-      width: 728
-      height: 90
+      width: 0 
+      height: 0
     sidebar:
       slot: 1075654054
-      width: 300
-      height: 250
+      width: 0
+      height: 0
     footer:
       slot: 2473302587
-      width: 728
-      height: 90
+      width: 0
+      height: 0
   smtp:
     activate: false
     server: "smtp.gmail.com"
